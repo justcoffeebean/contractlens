@@ -1,7 +1,9 @@
 const Groq = require('groq-sdk')
+const fetch = require('node-fetch')
 
 const groq = new Groq({
   apiKey: process.env.GROQ_API_KEY,
+  fetch: fetch,
 })
 
 async function analyzeContract(contractText) {
@@ -44,8 +46,6 @@ ${contractText.slice(0, 15000)}`,
   })
 
   const text = completion.choices[0].message.content
-
-  // Strip markdown code blocks if model wraps the response
   const clean = text.replace(/```json|```/g, '').trim()
 
   try {
