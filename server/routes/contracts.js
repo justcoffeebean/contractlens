@@ -20,10 +20,12 @@ router.post('/analyze', upload.single('contract'), async (req, res) => {
     console.log(`Extracted ${text.length} characters from ${pages} pages`)
 
     // Step 2: Send text to Groq for analysis
+    console.log('Sending to Groq...')
     const analysis = await analyzeContract(text)
     console.log('Analysis complete')
 
     // Step 3: Save to Supabase
+    console.log('Saving to Supabase...')
     const saved = await saveAnalysis({
       filename: req.file.originalname,
       pages,
@@ -40,6 +42,7 @@ router.post('/analyze', upload.single('contract'), async (req, res) => {
     })
   } catch (err) {
     console.error('Analysis error:', err.message)
+    console.error('Full error:', JSON.stringify(err, Object.getOwnPropertyNames(err)))
     res.status(500).json({ error: err.message })
   }
 })
@@ -86,6 +89,7 @@ router.post('/:id/ask', async (req, res) => {
     res.json({ answer })
   } catch (err) {
     console.error('Question error:', err.message)
+    console.error('Full error:', JSON.stringify(err, Object.getOwnPropertyNames(err)))
     res.status(500).json({ error: err.message })
   }
 })
