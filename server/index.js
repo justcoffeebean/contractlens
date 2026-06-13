@@ -9,7 +9,16 @@ const contractRoutes = require('./routes/contracts')
 const app = express()
 
 // Middleware
-app.use(cors({ origin: 'http://localhost:3000' }))
+app.use(cors({ 
+  origin: [
+    ' http://localhost:3000',
+    'http://localhost:3001',
+    'http://localhost:3002',
+    'https://contractlens-sepia.vercel.app',
+    
+  ],
+  credentials: false,
+}))
 app.use(express.json())
 
 // Health check
