@@ -3,6 +3,8 @@
 import { useState } from 'react'
 import axios from 'axios'
 
+const API = 'https://contractlens-api.onrender.com'
+
 const suggestedQuestions = [
   'What are my main obligations?',
   'Can I terminate this contract early?',
@@ -26,7 +28,7 @@ export default function AskQuestion({ contractId }) {
 
     try {
       const res = await axios.post(
-        `http://localhost:3002/api/contracts/${contractId}/ask`,
+        `${API}/api/contracts/${contractId}/ask`,
         { question: questionToAsk }
       )
 

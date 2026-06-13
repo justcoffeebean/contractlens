@@ -7,6 +7,8 @@ import LoadingState from './components/LoadingState'
 import HistoryPanel from './components/HistoryPanel'
 import axios from 'axios'
 
+const API = 'https://contractlens-api.onrender.com'
+
 export default function Home() {
   const [status, setStatus] = useState('idle')
   const [report, setReport] = useState(null)
@@ -24,7 +26,7 @@ export default function Home() {
       formData.append('contract', file)
 
       const res = await axios.post(
-        'http://localhost:3002/api/contracts/analyze',
+        `${API}/api/contracts/analyze`,
         formData,
         { headers: { 'Content-Type': 'multipart/form-data' } }
       )

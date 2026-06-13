@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react'
 import axios from 'axios'
 
+const API = 'https://contractlens-api.onrender.com'
+
 const riskColors = {
   low: { bg: '#0d2e1f', border: '#1a5c3a', text: '#4ade80' },
   medium: { bg: '#2e1f0d', border: '#6e3a1a', text: '#fb923c' },
@@ -16,7 +18,7 @@ export default function HistoryPanel({ onLoad, onClose }) {
   useEffect(() => {
     const fetchAnalyses = async () => {
       try {
-        const res = await axios.get('http://localhost:3002/api/contracts')
+        const res = await axios.get(`${API}/api/contracts`)
         setAnalyses(res.data.analyses)
       } catch (err) {
         console.error('Failed to fetch analyses:', err)
