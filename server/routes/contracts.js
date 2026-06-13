@@ -21,18 +21,30 @@ router.post('/analyze', upload.single('contract'), async (req, res) => {
 
     // Step 2: Send text to Groq for analysis
     console.log('Sending to Groq...')
-    const analysis = await analyzeContract(text)
-    console.log('Analysis complete')
+    let analysis
+    try {
+      analysis = await analyzeContract(text)
+      console.log('Groq analysis complete')
+    } catch (groqErr) {
+      console.error('GROQ FAILED:', groqErr.message)
+      return res.status(500).json({ error: `Groq failed: ${groqErr.message}` })
+    }
 
     // Step 3: Save to Supabase
     console.log('Saving to Supabase...')
-    const saved = await saveAnalysis({
-      filename: req.file.originalname,
-      pages,
-      contractText: text,
-      analysis,
-    })
-    console.log('Saved analysis:', saved.id)
+    let saved
+    try {
+      saved = await saveAnalysis({
+        filename: req.file.originalname,
+        pages,
+        contractText: text,
+        analysis,
+      })
+      console.log('Saved to Supabase:', saved.id)
+    } catch (supaErr) {
+      console.error('SUPABASE FAILED:', supaErr.message)
+      return res.status(500).json({ error: `Supabase failed: ${supaErr.message}` })
+    }
 
     res.json({
       id: saved.id,
@@ -42,7 +54,6 @@ router.post('/analyze', upload.single('contract'), async (req, res) => {
     })
   } catch (err) {
     console.error('Analysis error:', err.message)
-    console.error('Full error:', JSON.stringify(err, Object.getOwnPropertyNames(err)))
     res.status(500).json({ error: err.message })
   }
 })
