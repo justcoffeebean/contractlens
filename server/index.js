@@ -17,13 +17,14 @@ const { initializeWebSocket } = require('./services/websocket')
 const app = express()
 
 // Middleware
-app.use(cors({ 
-  origin: [
-    'http://localhost:3000',
-    'http://localhost:3001',
-    'http://localhost:3002',
-    'https://contractlens-sepia.vercel.app',
-  ],
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || origin.endsWith('.vercel.app') || origin.includes('localhost')) {
+      callback(null, true)
+    } else {
+      callback(new Error('Not allowed by CORS'))
+    }
+  },
   credentials: false,
 }))
 app.use(express.json())
