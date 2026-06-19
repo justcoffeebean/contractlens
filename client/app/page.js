@@ -1,20 +1,49 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import UploadZone from './components/UploadZone'
 import AnalysisReport from './components/AnalysisReport'
 import LoadingState from './components/LoadingState'
 import HistoryPanel from './components/HistoryPanel'
 import axios from 'axios'
+import { useAuth } from './context/AuthContext'
 
 const API = 'https://contractlens-api.onrender.com'
 
 export default function Home() {
+  const router = useRouter()
+  const { user, logout, loading } = useAuth()
   const [status, setStatus] = useState('idle')
   const [report, setReport] = useState(null)
   const [filename, setFilename] = useState('')
   const [error, setError] = useState('')
   const [showHistory, setShowHistory] = useState(false)
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/login')
+    }
+  }, [user, loading, router])
+
+  if (loading) {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: '#0f0f0f',
+        color: '#fff',
+      }}>
+        Loading...
+      </div>
+    )
+  }
+
+  if (!user) {
+    return null
+  }
 
   const handleUpload = async (file) => {
     setFilename(file.name)
@@ -78,21 +107,41 @@ export default function Home() {
         <span style={{ fontSize: 16, fontWeight: 700, color: '#fff' }}>
           🔍 ContractLens
         </span>
-        <button
-          onClick={() => setShowHistory(true)}
-          style={{
-            padding: '8px 16px',
-            background: '#1a1a1a',
-            color: '#fff',
-            border: '1px solid #2a2a2a',
-            borderRadius: 8,
-            fontSize: 13,
-            fontWeight: 600,
-            cursor: 'pointer',
-          }}
-        >
-          🕐 Past Analyses
-        </button>
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+          <span style={{ fontSize: 13, color: '#888' }}>
+            {user.email}
+          </span>
+          <button
+            onClick={() => setShowHistory(true)}
+            style={{
+              padding: '8px 16px',
+              background: '#1a1a1a',
+              color: '#fff',
+              border: '1px solid #2a2a2a',
+              borderRadius: 8,
+              fontSize: 13,
+              fontWeight: 600,
+              cursor: 'pointer',
+            }}
+          >
+            🕐 Past Analyses
+          </button>
+          <button
+            onClick={logout}
+            style={{
+              padding: '8px 16px',
+              background: '#1a1a1a',
+              color: '#f87171',
+              border: '1px solid #2a2a2a',
+              borderRadius: 8,
+              fontSize: 13,
+              fontWeight: 600,
+              cursor: 'pointer',
+            }}
+          >
+            Logout
+          </button>
+        </div>
       </nav>
 
       {/* Main content — offset for navbar */}
