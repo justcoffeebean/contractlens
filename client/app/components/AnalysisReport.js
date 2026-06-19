@@ -2,6 +2,8 @@
 
 import { useEffect, useRef } from 'react'
 import AskQuestion from './AskQuestion'
+import jsPDF from 'jspdf'
+import html2canvas from 'html2canvas'
 
 const riskColors = {
   low: { bg: '#0d2e1f', border: '#1a5c3a', text: '#4ade80' },
@@ -56,6 +58,7 @@ function Section({ title, children }) {
 export default function AnalysisReport({ report, onReset }) {
   const { filename, pages, analysis } = report
   const askRef = useRef(null)
+  const reportRef = useRef(null)
 
   // Smooth scroll to Q&A section after report loads
   useEffect(() => {
@@ -65,8 +68,27 @@ export default function AnalysisReport({ report, onReset }) {
     return () => clearTimeout(timer)
   }, [])
 
+  const handleDownloadPDF = async () => {
+    try {
+      const element = reportRef.current
+      const canvas = await html2canvas(element, {
+        backgroundColor: '#0f0f0f',
+        scale: 2,
+      })
+      const imgData = canvas.toDataURL('image/png')
+      const pdf = new jsPDF('p', 'mm', 'a4')
+      const imgWidth = 210
+      const imgHeight = (canvas.height * imgWidth) / canvas.width
+      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight)
+      pdf.save(`ContractLens-${filename.replace('.pdf', '')}.pdf`)
+    } catch (err) {
+      console.error('PDF generation error:', err)
+      alert('Failed to generate PDF. Please try again.')
+    }
+  }
+
   return (
-    <div style={{ maxWidth: 800, margin: '0 auto', padding: '40px 24px' }}>
+    <div ref={reportRef} style={{ maxWidth: 800, margin: '0 auto', padding: '40px 24px' }}>
 
       {/* Header */}
       <div style={{
@@ -86,6 +108,21 @@ export default function AnalysisReport({ report, onReset }) {
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <RiskBadge level={analysis.overallRisk} />
+          <button
+            onClick={handleDownloadPDF}
+            style={{
+              padding: '10px 20px',
+              background: '#1a1a1a',
+              color: '#fff',
+              border: '1px solid #2a2a2a',
+              borderRadius: 8,
+              cursor: 'pointer',
+              fontSize: 13,
+              fontWeight: 600,
+            }}
+          >
+            📄 Download PDF
+          </button>
           <button
             onClick={onReset}
             style={{

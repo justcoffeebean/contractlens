@@ -11,7 +11,7 @@ const supabase = createClient(
   }
 )
 
-async function saveAnalysis({ filename, pages, contractText, analysis }) {
+async function saveAnalysis({ filename, pages, contractText, analysis, userId }) {
   const { data, error } = await supabase
     .from('contract_analyses')
     .insert([{
@@ -19,6 +19,7 @@ async function saveAnalysis({ filename, pages, contractText, analysis }) {
       pages,
       contract_text: contractText,
       analysis,
+      user_id: userId,
     }])
     .select()
     .single()
@@ -27,25 +28,51 @@ async function saveAnalysis({ filename, pages, contractText, analysis }) {
   return data
 }
 
-async function getAnalyses() {
+async function getAnalyses(userId) {
   const { data, error } = await supabase
     .from('contract_analyses')
     .select('id, filename, pages, analysis, created_at')
+    .eq('user_id', userId)
     .order('created_at', { ascending: false })
 
   if (error) throw error
   return data
 }
 
-async function getAnalysis(id) {
+async function getAnalysis(id, userId) {
   const { data, error } = await supabase
     .from('contract_analyses')
     .select('*')
     .eq('id', id)
+    .eq('user_id', userId)
     .single()
 
   if (error) throw error
   return data
 }
 
-module.exports = { saveAnalysis, getAnalyses, getAnalysis }
+async function updateAnalysis(id, userId, updates) {
+  const { data, error } = await supabase
+    .from('contract_analyses')
+    .update(updates)
+    .eq('id', id)
+    .eq('user_id', userId)
+    .select()
+    .single()
+
+  if (error) throw error
+  return data
+}
+
+async function deleteAnalysis(id, userId) {
+  const { error } = await supabase
+    .from('contract_analyses')
+    .delete()
+    .eq('id', id)
+    .eq('user_id', userId)
+
+  if (error) throw error
+  return { success: true }
+}
+
+module.exports = { saveAnalysis, getAnalyses, getAnalysis, updateAnalysis, deleteAnalysis }
